@@ -96,7 +96,7 @@ def get_gradient(params):
 
 def cuda_device(x, use_cuda=False):
     if type(use_cuda) == bool:
-        if cuse_cuda:
+        if use_cuda:
             return x.cuda()
         else:
             return x

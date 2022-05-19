@@ -24,7 +24,7 @@ class TorchApproximator(Serializable):
         Args:
             input_shape (tuple): shape of the input of the network;
             output_shape (tuple): shape of the output of the network;
-            network (torch.nn.Module): the network class to use;
+            network (torch.nn.Module): the network class to use or model;
             optimizer (dict): the optimizer used for every fit step;
             loss (torch.nn.functional): the loss function to optimize in the
                 fit method;
@@ -99,7 +99,7 @@ class TorchApproximator(Serializable):
             The predictions of the model.
 
         """
-        torch_args = [cuda_device(torch.from_numpy(x), self._use_cuda)
+        torch_args = [cuda_device(torch.from_numpy(x), self._use_cuda) 
                       if isinstance(x, np.ndarray) else cuda_device(x, self._use_cuda) for x in args]
         val = self.network.forward(*torch_args,
                                    **kwargs)
