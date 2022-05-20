@@ -20,7 +20,7 @@ class TorchPolicy(Policy):
     required.
 
     """
-    def __init__(self, use_cuda, sft_model=None):
+    def __init__(self, use_cuda):
         """
         Constructor.
 
@@ -29,13 +29,9 @@ class TorchPolicy(Policy):
 
         """
         self._use_cuda = use_cuda
-        self._sft_model = sft_model
-        self._actions_to_pop = None
 
         self._add_save_attr(
             _use_cuda='primitive',
-            _sft_model='pickle',
-            _actions_to_pop='primitive'
         )
 
     def __call__(self, state, action):
@@ -45,14 +41,11 @@ class TorchPolicy(Policy):
         return np.exp(self.log_prob_t(s, a).item())
 
     def draw_action(self, state):
-        if self._actions_to_pop:
-            return self._actions_to_pop.pop()
-        else:
-            with torch.no_grad():
-                s = to_float_tensor(np.atleast_2d(state), self._use_cuda)
-                a = self.draw_action_t(s)
+        with torch.no_grad():
+            s = to_float_tensor(np.atleast_2d(state), self._use_cuda)
+            a = self.draw_action_t(s)
 
-            return torch.squeeze(a, dim=0).detach().cpu().numpy()
+        return torch.squeeze(a, dim=0).detach().cpu().numpy()
 
     def distribution(self, state):
         """
@@ -176,13 +169,7 @@ class TorchPolicy(Policy):
         """
         raise NotImplementedError
 
-    def reset(self, input_text=None):
-        if self._sft_model and input_text:
-            in_input_ids, _ = self._sft_model.make_input_ids_mask_attention(input_text)
-            output_ids = self._sft_model.model.generate(in_input_ids, max_length=self._sft_model.max_len)
-            print(output_ids)
-            output_ids = output_ids.unsqueeze(-1)[0].cpu().detach().numpy()
-            self._actions_to_pop = list(output_ids)[::-1]
+    def reset(self):
         pass
 
     @property
@@ -200,7 +187,7 @@ class GaussianTorchPolicy(TorchPolicy):
 
     """
     def __init__(self, network, input_shape, output_shape, std_0=1.,
-                 use_cuda=False, sft_model=None, **params):
+                 use_cuda=False, **params):
         """
         Constructor.
 
@@ -213,7 +200,7 @@ class GaussianTorchPolicy(TorchPolicy):
             params (dict): parameters used by the network constructor.
 
         """
-        super().__init__(use_cuda, sft_model)
+        super().__init__(use_cuda)
 
         self._action_dim = output_shape[0]
 
@@ -275,7 +262,7 @@ class BoltzmannTorchPolicy(TorchPolicy):
 
     """
     def __init__(self, network, input_shape, output_shape, beta, 
-                 use_cuda=False, sft_model=None, **params):
+                 use_cuda=False, **params):
         """
         Constructor.
 
@@ -291,7 +278,7 @@ class BoltzmannTorchPolicy(TorchPolicy):
             params (dict): parameters used by the network constructor.
 
         """
-        super().__init__(use_cuda, sft_model)
+        super().__init__(use_cuda)
 
         self._action_dim = output_shape[0]
         self._predict_params = dict()

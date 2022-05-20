@@ -69,12 +69,12 @@ class Agent(Serializable):
 
             return action
 
-    def episode_start(self, input_text=None):
+    def episode_start(self):
         """
         Called by the agent when a new episode starts.
 
         """
-        self.policy.reset(input_text)
+        self.policy.reset()
 
     def stop(self):
         """

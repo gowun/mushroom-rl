@@ -74,7 +74,7 @@ class Core(object):
 
         self._run(n_steps, n_episodes, fit_condition, render, quiet)
 
-    def evaluate(self, initial_states=None, input_texts=None, n_steps=None, n_episodes=None,
+    def evaluate(self, initial_states=None, n_steps=None, n_episodes=None,
                  render=False, quiet=False):
         """
         This function moves the agent in the environment using its policy.
@@ -94,10 +94,10 @@ class Core(object):
         fit_condition = lambda: False
 
         return self._run(n_steps, n_episodes, fit_condition, render, quiet,
-                         initial_states, input_texts)
+                         initial_states)
 
     def _run(self, n_steps, n_episodes, fit_condition, render, quiet,
-             initial_states=None, input_texts=None):
+             initial_states=None):
         assert n_episodes is not None and n_steps is None and initial_states is None\
             or n_episodes is None and n_steps is not None and initial_states is None\
             or n_episodes is None and n_steps is None and initial_states is not None
@@ -123,10 +123,10 @@ class Core(object):
                                          leave=False)
 
         return self._run_impl(move_condition, fit_condition, steps_progress_bar,
-                              episodes_progress_bar, render, initial_states, input_texts)
+                              episodes_progress_bar, render, initial_states)
 
     def _run_impl(self, move_condition, fit_condition, steps_progress_bar,
-                  episodes_progress_bar, render, initial_states, input_texts):
+                  episodes_progress_bar, render, initial_states):
         self._total_episodes_counter = 0
         self._total_steps_counter = 0
         self._current_episodes_counter = 0
@@ -136,7 +136,7 @@ class Core(object):
         last = True
         while move_condition():
             if last:
-                self.reset(initial_states, input_texts)
+                self.reset(initial_states)
 
             sample = self._step(render)
 
@@ -202,7 +202,7 @@ class Core(object):
 
         return state, action, reward, next_state, absorbing, last
 
-    def reset(self, initial_states=None, input_texts=None):
+    def reset(self, initial_states=None):
         """
         Reset the state of the agent.
 
@@ -210,13 +210,11 @@ class Core(object):
         if initial_states is None\
             or self._total_episodes_counter == self._n_episodes:
             initial_state = None
-            input_text = None
         else:
             initial_state = initial_states[self._total_episodes_counter]
-            input_text = input_texts[self._total_episodes_counter]
 
         self._state = self._preprocess(self.mdp.reset(initial_state).copy())
-        self.agent.episode_start(input_text)
+        self.agent.episode_start()
         self.agent.next_action = None
         self._episode_steps = 0
 
