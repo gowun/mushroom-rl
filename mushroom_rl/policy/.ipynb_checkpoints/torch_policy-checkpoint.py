@@ -179,7 +179,9 @@ class TorchPolicy(Policy):
     def reset(self, input_text=None):
         if self._sft_model and input_text:
             in_input_ids, _ = self._sft_model.make_input_ids_mask_attention(input_text)
-            output_ids = self._sft_model.model.generate(torch.tensor([in_input_ids]).to(self._sft_model.device), max_length=self._sft_model.max_len).unsqueeze(-1)[0].cpu().detach().numpy()
+            output_ids = self._sft_model.model.generate(in_input_ids, max_length=self._sft_model.max_len)
+            print(output_ids)
+            output_ids = output_ids.unsqueeze(-1)[0].cpu().detach().numpy()
             self._actions_to_pop = list(output_ids)[::-1]
         pass
 
