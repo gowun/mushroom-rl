@@ -309,7 +309,10 @@ class BoltzmannTorchPolicy(TorchPolicy):
         return torch.mean(self.distribution_t(state).entropy())
 
     def distribution_t(self, state):
-        logits = self._logits(state, **self._predict_params, output_tensor=True) * self._beta(state.numpy())
+        try:
+            logits = self._logits(state, **self._predict_params, output_tensor=True) * self._beta(state.numpy())
+        except:
+            logits = state * self._beta(state.numpy())
         return torch.distributions.Categorical(logits=logits)
 
     def set_weights(self, weights):
