@@ -136,9 +136,9 @@ class Core(object):
         last = True
         while move_condition():
             if last:
-                self.reset(initial_states)
-
-            sample = self._step(render)
+                self.reset(initial_states, fit_condition)
+            
+            sample = self._step(render, fit_condition)
 
             self.callback_step([sample])
 
@@ -172,7 +172,7 @@ class Core(object):
 
         return dataset
 
-    def _step(self, render):
+    def _step(self, render, fit_condition=lambda: True):
         """
         Single step.
 
@@ -186,7 +186,10 @@ class Core(object):
 
         """
         action = self.agent.draw_action(self._state)
-        next_state, reward, absorbing, _ = self.mdp.step(action)
+        if fit_condition():
+            next_state, reward, absorbing, _ = self.mdp.step(action)
+        else:
+            next_state, reward, absorbing, _ = self.mdp.step(action, False)
 
         self._episode_steps += 1
 
@@ -202,7 +205,7 @@ class Core(object):
 
         return state, action, reward, next_state, absorbing, last
 
-    def reset(self, initial_states=None):
+    def reset(self, initial_states=None, fit_condition=lambda: True):
         """
         Reset the state of the agent.
 
@@ -212,8 +215,10 @@ class Core(object):
             initial_state = None
         else:
             initial_state = initial_states[self._total_episodes_counter]
-
-        self._state = self._preprocess(self.mdp.reset(initial_state).copy())
+        if fit_condition():
+            self._state = self._preprocess(self.mdp.reset(initial_state).copy())
+        else:
+            self._state = self._preprocess(self.mdp.reset(initial_state, False).copy())
         self.agent.episode_start()
         self.agent.next_action = None
         self._episode_steps = 0

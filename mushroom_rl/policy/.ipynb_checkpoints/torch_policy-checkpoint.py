@@ -31,7 +31,7 @@ class TorchPolicy(Policy):
         self._use_cuda = use_cuda
 
         self._add_save_attr(
-            _use_cuda='primitive',
+            _use_cuda='primitive'
         )
 
     def __call__(self, state, action):
