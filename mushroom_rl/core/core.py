@@ -136,9 +136,9 @@ class Core(object):
         last = True
         while move_condition():
             if last:
-                self.reset(initial_states, fit_condition)
+                self.reset(initial_states)#, fit_condition)
             
-            sample = self._step(render, fit_condition)
+            sample = self._step(render)#, fit_condition)
 
             self.callback_step([sample])
 
