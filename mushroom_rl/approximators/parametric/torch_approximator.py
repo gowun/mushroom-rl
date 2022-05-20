@@ -15,7 +15,7 @@ class TorchApproximator(Serializable):
     This class supports also minibatches.
 
     """
-    def __init__(self, network, input_shape=None, output_shape=None, optimizer=None,
+    def __init__(self, input_shape, output_shape, network, optimizer=None,
                  loss=None, batch_size=0, n_fit_targets=1, use_cuda=False,
                  reinitialize=False, dropout=False, quiet=True, **params):
         """
@@ -52,11 +52,8 @@ class TorchApproximator(Serializable):
         self._quiet = quiet
         self._n_fit_targets = n_fit_targets
         
-        if input_shape and output_shape:
-            self.network = network(input_shape, output_shape, use_cuda=use_cuda,
-                                   dropout=dropout, **params)
-        else:
-            self.network = network
+        self.network = network(input_shape, output_shape, use_cuda=use_cuda,
+                               dropout=dropout, **params)
 
         if self._use_cuda:
             #self.network.cuda()
