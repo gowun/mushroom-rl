@@ -52,12 +52,10 @@ class TorchApproximator(Serializable):
         self._quiet = quiet
         self._n_fit_targets = n_fit_targets
         
-        self.network = network(input_shape, output_shape, use_cuda=use_cuda,
+        self.network = network(input_shape, output_shape, use_cuda=self._use_cuda,
                                dropout=dropout, **params)
-
-        if self._use_cuda:
-            #self.network.cuda()
-            self.network = cuda_device(self.network, self._use_cuda)
+        self.network = cuda_device(self.network, self._use_cuda)
+        
         if self._dropout:
             self.network.eval()
 

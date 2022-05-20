@@ -100,7 +100,7 @@ def cuda_device(x, use_cuda=False):
             return x.cuda()
         else:
             return x
-    elif type(use_cuda) == int:
+    elif type(use_cuda) == int and use_cuda > -1:
         return x.to(torch.device(f'cuda:{use_cuda}'))
 
 
